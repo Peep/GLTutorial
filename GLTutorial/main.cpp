@@ -92,7 +92,7 @@ int main()
 
 	glBindVertexArray(0); // Unbind VAO
 
-						  // Begin render loop
+	// Begin render loop
 	while (!glfwWindowShouldClose(window))
 	{
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
@@ -105,6 +105,12 @@ int main()
 
 		// Draw the triangle
 		ourShader.Use();
+
+		GLfloat timeValue = glfwGetTime();
+
+		GLfloat greenValue = (sin(timeValue) / 2) + 0.5;
+		GLint ourColorLocation = glGetUniformLocation(ourShader.Program, "ourColor");
+		glUniform3f(ourColorLocation, 0.0f, greenValue, 0.0f);
 
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);

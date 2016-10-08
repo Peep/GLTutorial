@@ -1,9 +1,12 @@
 #version 410 core
-in vec3 ourColor;
+
+uniform vec3 ourColor;
 
 out vec4 color;
-
+in vec3 vertexColor;
+  
 void main()
 {
-    color = vec4(ourColor, 1.0f);
+	vec3 result = vertexColor;
+    color = vec4(result, 1.0f);
 }
