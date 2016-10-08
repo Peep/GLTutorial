@@ -72,7 +72,7 @@ public:
 
 		// Similar for fragment Shader
 		fragment = glCreateShader(GL_FRAGMENT_SHADER);
-		glShaderSource(fragment, 1, &vShaderCode, NULL);
+		glShaderSource(fragment, 1, &fShaderCode, NULL);
 		glCompileShader(fragment);
 		// Print compile errors if any
 		glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
