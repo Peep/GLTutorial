@@ -57,7 +57,7 @@ int main()
 	glfwSetKeyCallback(window, key_callback);
 
 	// Build and compile our shader program
-	Shader ourShader("path/to/shaders/default.vs", "path/to/shaders/default.frag");
+	Shader ourShader("shader.vs", "shader.frag");
 
 	// Triangle definition
 	float vertices[] =
@@ -90,9 +90,9 @@ int main()
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
-	glBindVertexArray(0);
+	glBindVertexArray(0); // Unbind VAO
 
-	// Begin render loop
+						  // Begin render loop
 	while (!glfwWindowShouldClose(window))
 	{
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
@@ -105,6 +105,7 @@ int main()
 
 		// Draw the triangle
 		ourShader.Use();
+
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 		glBindVertexArray(0);
