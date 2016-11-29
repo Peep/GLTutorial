@@ -5,6 +5,8 @@
 #include <iostream>
 #include <assert.h>
 #include "Shader.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
@@ -32,6 +34,18 @@ GLFWwindow* MakeWindow()
 	glViewport(0, 0, width, height);
 
 	return window;
+}
+
+void multiMatrix(float* matrix, float* vector, float* out)
+{
+	float transMatrix[4] = {
+		vector[0], vector[1], vector[2], 1
+	};
+
+	out[0] = (matrix[0] * transMatrix[0]) + (matrix[1] * transMatrix[1]) + (matrix[2] * transMatrix[2]) + (matrix[3] * transMatrix[3]);
+	out[1] = (matrix[4] * transMatrix[0]) + (matrix[5] * transMatrix[1]) + (matrix[6] * transMatrix[2]) + (matrix[7] * transMatrix[3]);
+	out[2] = (matrix[8] * transMatrix[0]) + (matrix[9] * transMatrix[1]) + (matrix[10] * transMatrix[2]) + (matrix[11] * transMatrix[3]);
+	out[3] = (matrix[12] * transMatrix[0]) + (matrix[13] * transMatrix[1]) + (matrix[14] * transMatrix[2]) + (matrix[15] * transMatrix[3]);
 }
 
 int main()
@@ -68,6 +82,52 @@ int main()
 		0.0,  0.5, 0.0,  0.0, 0.0, 1.0  // Top
 	};
 
+	float identityMatrix[] =
+	{
+		1, 0, 0, 0,
+		0, 1, 0, 0.5,
+		0, 0, 1, 0,
+		0, 0, 0, 1
+	};
+
+	// TODO: Transfer each myButt result into the positions.
+
+	float myButt[] = { 0, 0, 0, 0 };
+
+	multiMatrix(identityMatrix, vertices, myButt);
+	multiMatrix(identityMatrix, (vertices + 6), myButt);
+	multiMatrix(identityMatrix, (vertices + 12), myButt);
+
+	// Texture coordinates
+	float texCoords[] = {
+		0.0f, 0.0f, // Bottom left corner
+		1.0f, 0.0f, // Lower right corner
+		0.5f, 1.0f, // Top center corner
+	};
+
+	unsigned int texture;
+
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+	float borderColor[] = { 1.0f, 1.0f, 0.f, 1.0f };
+	glTextureParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int width, height, pixelSize;
+	unsigned char* image = stbi_load("container.jpg", &width, &height, &pixelSize, 0);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	stbi_image_free(image);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 	// Make VAO
 	unsigned int VAO;
 	glGenVertexArrays(1, &VAO);
@@ -92,6 +152,8 @@ int main()
 
 	glBindVertexArray(0); // Unbind VAO
 
+	int fps = 0;
+
 	// Begin render loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -106,9 +168,9 @@ int main()
 		// Draw the triangle
 		ourShader.Use();
 
-		GLfloat timeValue = glfwGetTime();
+		float timeValue = (float)glfwGetTime();
 
-		GLfloat greenValue = (sin(timeValue) / 2) + 0.5;
+		float greenValue = (float)((sin(timeValue) / 2) + 0.5);
 		GLint ourColorLocation = glGetUniformLocation(ourShader.Program, "ourColor");
 		glUniform3f(ourColorLocation, 0.0f, greenValue, 0.0f);
 
@@ -118,6 +180,8 @@ int main()
 
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
+
+		fps++;
 	}
 
 	// Properly de-allocate all resources once they've outlived their purposes
